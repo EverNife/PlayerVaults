@@ -19,6 +19,7 @@
 package com.drtshock.playervaults.vaultmanagement;
 
 
+import br.com.finalcraft.evernifecore.fcitemstack.FCItemStack;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -44,7 +45,12 @@ public class Base64Serialization {
 
             // Save every element in the list
             for (int i = 0; i < inventory.getSize(); i++) {
-                dataOutput.writeObject(inventory.getItem(i));
+                if (inventory.getItem(i) != null){
+                    FCItemStack fcItemStack = new FCItemStack(inventory.getItem(i));
+                    dataOutput.writeObject(fcItemStack.getBase64BynaryCode());
+                }else {
+                    dataOutput.writeObject((String)"");
+                }
             }
 
             // Serialize that array
@@ -68,7 +74,11 @@ public class Base64Serialization {
             Inventory inventory = Bukkit.getServer().createInventory(null, dataInput.readInt());
             // Read the serialized inventory
             for (int i = 0; i < inventory.getSize(); i++) {
-                inventory.setItem(i, (ItemStack) dataInput.readObject());
+                String base64 = (String) dataInput.readObject();
+                if (base64 != null && !base64.isEmpty()){
+                    FCItemStack fcItemStack = new FCItemStack(base64);
+                    inventory.setItem(i, fcItemStack.getItemStack());
+                }
             }
             dataInput.close();
             return inventory;
